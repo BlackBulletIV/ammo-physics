@@ -1,9 +1,4 @@
--- This is for love.physics. For custom physics, see Physical.
-
 PhysicalEntity = class('PhysicalEntity', Entity)
-
--- METATABLE --
-
 PhysicalEntity._mt = {}
 
 function PhysicalEntity._mt:__index(key)
@@ -12,7 +7,14 @@ function PhysicalEntity._mt:__index(key)
   elseif key == 'vely' then
     return self._velocity.y
   else
-    return Entity._mt.__index(self, key)
+    local result = Entity._mt.__index(self, key)
+    
+    if result then
+      return result
+    elseif self._body and self._body[key] then
+      PhysicalEntity[key] = function(s, ...) return s._body[key](s._body, ...) end
+      return PhysicalEntity[key]
+    end
   end
 end
 
@@ -47,14 +49,16 @@ end
 
 PhysicalEntity:enableAccessors()
 
--- METHODS --
-
-function PhysicalEntity:initialize(t)
+function PhysicalEntity:initialize(x, y, type)
   Entity.initialize(self, t)
   self._velocity = Vector(0, 0)
   self._rotation = 0
-  self._shapes = {}
+  self.bodyType = type or "static"
   self:applyAccessors()
+end
+
+function PhysicalEntity:added()
+  self:setupBody()
 end
 
 function PhysicalEntity:update(dt)
@@ -71,9 +75,11 @@ function PhysicalEntity:update(dt)
   end
 end
 
-function PhysicalEntity:collided(shape, other, otherShape, collision)
+--[[ Format for the collided function
+function PhysicalEntity:collided(other, fixture, otherFixture, contact)
   
 end
+]]
 
 function PhysicalEntity:removed()
   self:destroy()
@@ -81,22 +87,8 @@ end
 
 function PhysicalEntity:destroy()
   if self._body then
-    for _, v in pairs(self._shapes) do
-      v:setCategory(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
-    end
-
-    delayFrames(1, function()
-      for _, v in pairs(self._shapes) do
-        v:destroy()
-      end
-      
-      self._shapes = {}
-      
-      if self._body then
-        self._body:destroy()
-        self._body = nil
-      end
-    end)
+    self._body:destroy()
+    self._body = nil
   end
 end
 
@@ -104,67 +96,15 @@ function PhysicalEntity:rotate(dr)
   self.rotation = self.rotation + dr
 end
 
-function PhysicalEntity:setupBody(mass, inertia)
+function PhysicalEntity:setupBody(type)
   if self._world then
-    self._body = love.physics.newBody(self._world._world, self._pos.x, self._pos.y, mass, inertia)
+    self._body = love.physics.newBody(self._world._world, self._pos.x, self._pos.y, type or self.bodyType)
     if self._rotation ~= 0 then self._body:setAngle(self._rotation) end
   end
 end
 
-function PhysicalEntity:newCircleShape(x, y, radius)
-  if self._body then
-    local shape = love.physics.newCircleShape(self._body, x, y, radius)
-    shape:setData{self = self, shape = shape}
-    table.insert(self._shapes, shape)
-    return shape
-  end
-end
-
-function PhysicalEntity:newPolygonShape(...)
-  if self._body then
-    local shape = love.physics.newPolygonShape(self._body, ...)
-    shape:setData{self = self, shape = shape}
-    table.insert(self._shapes, shape)
-    return shape
-  end
-end
-
-function PhysicalEntity:newRectangleShape(x, y, width, height, angle)
-  if self._body then
-    local shape = love.physics.newRectangleShape(self._body, x, y, width, height, angle)
-    shape:setData{self = self, shape = shape}
-    table.insert(self._shapes, shape)
-    return shape
-  end
-end
-
-function PhysicalEntity:newDistanceJoint(other, x1, y1, x2, y2)
-  if self._body and other._body then
-    return love.physics.newDistanceJoint(self._body, other._body, x1, y1, x2, y2)
-  end
-end
-
-function PhysicalEntity:newRevoluteJoint(other, x, y)
-  if self._body and other._body then
-    return love.physics.newRevoluteJoint(self._body, other._body, x, y)
-  end
-end
-
--- TODO other joint functions
-
-for _, v in pairs{'applyForce', 'applyImpulse', 'applyTorque', 
-                  'getAllowSleeping', 'getAngle', 'getAngularDamping',
-                  'getAngularVelocity', 'getInertia', 'getLinearDamping',
-                  'getLinearVelocity', 'getLinearVelocityFromLocalPoint',
-                  'getLinearVelocityFromWorldPoint', 'getLocalCenter',
-                  'getLocalPoint', 'getLocalVector', 'getMass', 'getWorldCenter',
-                  'getWorldPoint', 'getWorldVector', 'isBullet', 'isDynamic',
-                  'isFrozen', 'isSleeping', 'isStatic', 'putToSleep',
-                  'setAllowSleeping', 'setAngle', 'setAngularDamping',
-                  'setAngularVelocity', 'setBullet', 'setFixedRotation',
-                  'setInertia', 'setLinearDamping', 'setLinearVelocity', 'setMass', 
-                  'setMassFromShapes', 'wakeUp'} do
-  PhysicalEntity[v] = function(self, ...)
-    return self._body[v](self._body, ...)
-  end
+function PhysicalEntity:addShape(shape, density)
+  local fixture = love.physics.newFixture(self._body, shape, density)
+  fixture:setUserData(self)
+  return fixture
 end

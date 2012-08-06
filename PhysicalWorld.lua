@@ -1,5 +1,3 @@
--- This is for love.physics. For custom physics, see Physical.
-
 PhysicalWorld = class('PhysicalWorld', World)
 PhysicalWorld._mt = {}
 
@@ -9,8 +7,8 @@ function PhysicalWorld._mt:__index(key)
   if result then
     return result
   elseif self._world[key] then
-    self[key] = function(self, ...) return self._world[key](self._world, ...) end
-    return self[key]
+    PhysicalWorld[key] = function(s, ...) return s._world[key](s._world, ...) end
+    return PhysicalWorld[key]
   end
 end 
 
@@ -59,6 +57,7 @@ function PhysicalWorld:sleepAll()
   end
 end
 
-function PhysicalWorld._onCollide(a, b, collision)
-  a.self:collided(a.shape, b.self, b.shape, collision)
+function PhysicalWorld._onCollide(a, b, contact)
+  local a:getUserData()
+  if a.collided then a:collided(b:getUserData(), a, b, contact) end
 end
