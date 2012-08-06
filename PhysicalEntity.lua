@@ -11,7 +11,7 @@ function PhysicalEntity._mt:__index(key)
     
     if result then
       return result
-    elseif self._body and self._body[key] then
+    elseif rawget(self, "_body") and self._body[key] then
       PhysicalEntity[key] = function(s, ...) return s._body[key](s._body, ...) end
       return PhysicalEntity[key]
     end
@@ -50,7 +50,7 @@ end
 PhysicalEntity:enableAccessors()
 
 function PhysicalEntity:initialize(x, y, type)
-  Entity.initialize(self, t)
+  Entity.initialize(self, x, y)
   self._velocity = Vector(0, 0)
   self._rotation = 0
   self.bodyType = type or "static"

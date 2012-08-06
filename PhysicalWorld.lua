@@ -58,6 +58,6 @@ function PhysicalWorld:sleepAll()
 end
 
 function PhysicalWorld._onCollide(a, b, contact)
-  local a:getUserData()
-  if a.collided then a:collided(b:getUserData(), a, b, contact) end
+  local entity = a:getUserData()
+  if entity.collided then entity:collided(b:getUserData(), a, b, contact) end
 end
