@@ -1,4 +1,5 @@
 PhysicalWorld = class('PhysicalWorld', World)
+PhysicalWorld.static.maxDelta = .03
 PhysicalWorld._mt = {}
 
 function PhysicalWorld._mt:__index(key)
@@ -24,12 +25,12 @@ end
 
 function PhysicalWorld:update(dt)
   if self.physicsActive then
-    if dt > .03 then
+    if dt > PhysicalWorld.maxDelta then
       local current = dt
       
-      while current > .03 do
-        current = current - .03
-        self._world:update(.03)
+      while current > PhysicalWorld.maxDelta do
+        current = current - PhysicalWorld.maxDelta
+        self._world:update(PhysicalWorld.maxDelta)
       end
       
       self._world:update(current)
@@ -58,6 +59,12 @@ function PhysicalWorld:sleepAll()
 end
 
 function PhysicalWorld._onCollide(a, b, contact)
-  local entity = a:getUserData()
-  if entity.collided then entity:collided(b:getUserData(), a, b, contact) end
+  local entityA = a:getUserData()
+  local entityB = b:getUserData()
+  
+  if entityA.collided then
+    entityA:collided(entityB, a, b, contact)
+  elseif entityB.collided then
+    entityB:collided(entityA, a, b, contact)
+  end
 end
