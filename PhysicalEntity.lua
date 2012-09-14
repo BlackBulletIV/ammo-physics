@@ -81,16 +81,14 @@ function PhysicalEntity:collided(other, fixture, otherFixture, contact)
 end
 ]]
 
-function PhysicalEntity:removed()
-  self:destroy()
-end
-
 function PhysicalEntity:destroy()
   if self._body then
     self._body:destroy()
     self._body = nil
   end
 end
+
+PhysicalEntity.removed = PhysicalEntity.destroy
 
 function PhysicalEntity:rotate(dr)
   self.rotation = self.rotation + dr
