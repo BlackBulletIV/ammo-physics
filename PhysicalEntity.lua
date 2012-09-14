@@ -28,8 +28,8 @@ function PhysicalEntity._mt:__newindex(key, value)
   elseif key == 'pos' then
     self._pos = value
     if self._body then self._body:setPosition(value.x, value.y) end
-  elseif key == 'rotation' then
-    self._rotation = value
+  elseif key == 'angle' then
+    self._angle = value
     if self._body then self._body:setAngle(value) end
   elseif key == 'velx' then
     self._velocity.x = value
@@ -52,7 +52,7 @@ PhysicalEntity:enableAccessors()
 function PhysicalEntity:initialize(x, y, type)
   Entity.initialize(self, x, y)
   self._velocity = Vector(0, 0)
-  self._rotation = 0
+  self._angle = 0
   self.bodyType = type or "static"
   self:applyAccessors()
 end
@@ -68,9 +68,9 @@ function PhysicalEntity:update(dt)
 
     if self.noRotate then
       self._body:setAngle(0)
-      self._rotation = 0
+      self._angle = 0
     else
-      self._rotation = self._body:getAngle()
+      self._angle = self._body:getAngle()
     end
   end
 end
@@ -91,13 +91,13 @@ end
 PhysicalEntity.removed = PhysicalEntity.destroy
 
 function PhysicalEntity:rotate(dr)
-  self.rotation = self.rotation + dr
+  self.angle = self.angle + dr
 end
 
 function PhysicalEntity:setupBody(type)
   if self._world then
     self._body = love.physics.newBody(self._world._world, self._pos.x, self._pos.y, type or self.bodyType)
-    if self._rotation ~= 0 then self._body:setAngle(self._rotation) end
+    if self._angle ~= 0 then self._body:setAngle(self._angle) end
   end
 end
 
