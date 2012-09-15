@@ -1,10 +1,10 @@
-PhysicalEntity = class('PhysicalEntity', Entity)
+PhysicalEntity = class("PhysicalEntity", Entity)
 PhysicalEntity._mt = {}
 
 function PhysicalEntity._mt:__index(key)
-  if key == 'velx' then
+  if key == "velx" then
     return self._velocity.x
-  elseif key == 'vely' then
+  elseif key == "vely" then
     return self._velocity.y
   else
     local result = Entity._mt.__index(self, key)
@@ -19,27 +19,25 @@ function PhysicalEntity._mt:__index(key)
 end
 
 function PhysicalEntity._mt:__newindex(key, value)
-  if key == 'x' then
+  if key == "x" then
     self._pos.x = value
     if self._body then self._body:setX(value) end
-  elseif key == 'y' then
+  elseif key == "y" then
     self._pos.y = value
     if self._body then self._body:setY(value) end
-  elseif key == 'pos' then
+  elseif key == "pos" then
     self._pos = value
     if self._body then self._body:setPosition(value.x, value.y) end
-  elseif key == 'angle' then
+  elseif key == "angle" then
     self._angle = value
     if self._body then self._body:setAngle(value) end
-  elseif key == 'velx' then
+  elseif key == "velx" then
     self._velocity.x = value
-    local vx, vy = self._body:getLinearVelocity()
-    if self._body then self._body:setLinearVelocity(value, vy) end
-  elseif key == 'vely' then
+    if self._body then self._body:setLinearVelocity(value, self._velocity.y) end
+  elseif key == "vely" then
     self._velocity.y = value
-    local vx, vy = self._body:getLinearVelocity()
-    if self._body then self._body:setLinearVelocity(vx, value) end
-  elseif key == 'velocity' then
+    if self._body then self._body:setLinearVelocity(self._velocity.x, value) end
+  elseif key == "velocity" then
     self._velocity = value
     if self._body then self._body:setLinearVelocity(value.x, value.y) end
   else
@@ -97,7 +95,7 @@ end
 function PhysicalEntity:setupBody(type)
   if self._world then
     self._body = love.physics.newBody(self._world._world, self._pos.x, self._pos.y, type or self.bodyType)
-    if self._angle ~= 0 then self._body:setAngle(self._angle) end
+    self._body:setAngle(self._angle)
   end
 end
 

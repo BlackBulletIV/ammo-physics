@@ -1,4 +1,4 @@
-PhysicalWorld = class('PhysicalWorld', World)
+PhysicalWorld = class("PhysicalWorld", World)
 PhysicalWorld.static.maxDelta = .03
 PhysicalWorld._mt = {}
 
