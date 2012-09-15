@@ -62,9 +62,9 @@ function PhysicalWorld._onCollide(a, b, contact)
   local entityA = a:getUserData()
   local entityB = b:getUserData()
   
-  if entityA.collided then
+  if entityA.collided and not entityA._removalQueued then
     entityA:collided(entityB, a, b, contact)
-  elseif entityB.collided then
+  elseif entityB.collided and not entityB._removalQueued then
     entityB:collided(entityA, a, b, contact)
   end
 end
