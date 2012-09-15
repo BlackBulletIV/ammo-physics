@@ -55,10 +55,6 @@ function PhysicalEntity:initialize(x, y, type)
   self:applyAccessors()
 end
 
-function PhysicalEntity:added()
-  self:setupBody()
-end
-
 function PhysicalEntity:update(dt)
   if self._body then
     self._pos.x, self._pos.y = self._body:getPosition()
@@ -86,21 +82,24 @@ function PhysicalEntity:destroy()
   end
 end
 
-PhysicalEntity.removed = PhysicalEntity.destroy
-
-function PhysicalEntity:rotate(dr)
-  self.angle = self.angle + dr
-end
-
 function PhysicalEntity:setupBody(type)
   if self._world then
     self._body = love.physics.newBody(self._world._world, self._pos.x, self._pos.y, type or self.bodyType)
     self._body:setAngle(self._angle)
+    self._body:setLinearVelocity(self._velocity.x, self._velocity.y)
   end
 end
+
+PhysicalEntity.added = PhysicalEntity.setupBody
+PhysicalEntity.removed = PhysicalEntity.destroy
 
 function PhysicalEntity:addShape(shape, density)
   local fixture = love.physics.newFixture(self._body, shape, density)
   fixture:setUserData(self)
   return fixture
 end
+
+function PhysicalEntity:rotate(dr)
+  self.angle = self.angle + dr
+end
+
