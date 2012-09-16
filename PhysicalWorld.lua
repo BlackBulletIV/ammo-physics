@@ -64,7 +64,9 @@ function PhysicalWorld._onCollide(a, b, contact)
   
   if entityA.collided and not entityA._removalQueued then
     entityA:collided(entityB, a, b, contact)
-  elseif entityB.collided and not entityB._removalQueued then
+  end
+  
+  if entityB.collided and not entityB._removalQueued then
     entityB:collided(entityA, a, b, contact)
   end
 end
