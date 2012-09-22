@@ -94,7 +94,7 @@ PhysicalEntity.added = PhysicalEntity.setupBody
 PhysicalEntity.removed = PhysicalEntity.destroy
 
 function PhysicalEntity:addShape(shape, density)
-  local fixture = love.physics.newFixture(self._body, shape, density)
+  local fixture = love.physics.newFixture(self._body, shape, density or 1)
   fixture:setUserData(self)
   return fixture
 end
