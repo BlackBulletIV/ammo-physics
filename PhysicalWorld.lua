@@ -43,7 +43,7 @@ function PhysicalWorld:update(dt)
 end
 
 function PhysicalWorld:wakeAll()
-  for v in self._updates:getIterator() do
+  for v in self._updates:iterate() do
     if instanceOf(PhysicalEntity, v) and v._body then
       v._body:wakeUp()
     end
@@ -51,7 +51,7 @@ function PhysicalWorld:wakeAll()
 end
 
 function PhysicalWorld:sleepAll()
-  for v in self._updates:getIterator() do
+  for v in self._updates:iterate() do
     if instanceOf(PhysicalEntity, v) and v._body then
       v._body:putToSleep()
     end
